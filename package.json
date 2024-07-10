@@ -1,14 +1,14 @@
 {
+  "homepage": "https://mahi-teja.github.io/Score-Board/",
   "name": "score-board",
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://mahi-teja.github.io/Score-Board/",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "predeploy" : "npm run build",
-    "deploy" : "gh-pages -d build",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
@@ -28,6 +28,7 @@
     "eslint-plugin-react-refresh": "^0.4.6",
     "gh-pages": "^6.1.1",
     "postcss": "^8.4.38",
+    "react-router-dom": "^6.24.1",
     "tailwindcss": "^3.4.3",
     "vite": "^5.2.0"
   }
