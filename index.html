@@ -7,41 +7,37 @@
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
 
-    <meta name="theme-color" content="#171717" />
+    <meta name="mobile-web-app-capable" content="yes" />
+
     <meta name="apple-mobile-web-app-capable" content="yes" />
+
     <meta
       name="apple-mobile-web-app-status-bar-style"
       content="black-translucent"
     />
+    <meta name="apple-mobile-web-app-title" content="ScoreCard" />
 
-    <title>ScoreCard | Professional Scoring</title>
+    <meta name="theme-color" content="#171717" />
+
+    <title>ScoreCard</title>
 
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-      integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
-      crossorigin="anonymous"
       referrerpolicy="no-referrer"
     />
 
     <style>
-      /* Prevent the annoying "Pull-to-refresh" on mobile which can reset state */
       body {
         overscroll-behavior-y: contain;
         -webkit-tap-highlight-color: transparent;
-      }
-
-      /* Custom scrollbar for your "no-scrollbar" class fallback */
-      .no-scrollbar::-webkit-scrollbar {
-        display: none;
-      }
-      .no-scrollbar {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
+        -webkit-user-select: none;
+           -moz-user-select: none;
+                user-select: none; /* Prevents text selection during rapid tapping */
       }
     </style>
-    <script type="module" crossorigin src="./assets/index-BaeSe56u.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-BYyCa4tM.css">
+    <script type="module" crossorigin src="/assets/index-BaeSe56u.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-BYyCa4tM.css">
   </head>
   <body
     class="h-full overflow-x-hidden antialiased selection:bg-dominant selection:text-white"
