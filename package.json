@@ -2,7 +2,7 @@
   "homepage": "https://mahi-teja.github.io/Score-Board/",
   "name": "score-board",
   "private": true,
-  "version": "0.0.0",
+  "version": "2.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite --host",
