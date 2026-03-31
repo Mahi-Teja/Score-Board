@@ -1,208 +1,147 @@
-import React, { useRef, useState } from "react";
-import { useRecoilState, useSetRecoilState } from "recoil";
+import React, { useEffect, useState } from "react";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { oversLimitedTo, wicketsLimitedTo } from "../atoms/settingsAtom";
 import {
-  oversLimitedTo,
-  runsOnExtra,
-  wicketsLimitedTo,
-} from "../atoms/settingsAtom";
-import { NewMatch } from "./NewMatch";
+  teamANameAtom,
+  teamBNameAtom,
+  matchStatusAtom,
+} from "../atoms/matchAtom";
 import Toggle from "./Toggle";
 
 export const Settings = () => {
-    
+  const matchStarted = useRecoilValue(matchStatusAtom);
+  const [teamA, setTeamA] = useRecoilState(teamANameAtom);
+  const [teamB, setTeamB] = useRecoilState(teamBNameAtom);
   const [oversLimit, setOversLimit] = useRecoilState(oversLimitedTo);
   const [wicketsLimit, setWicketsLimit] = useRecoilState(wicketsLimitedTo);
 
   return (
-    <div className="  bg-color-main-body ">
-      <div className="bg-controls-bg  opacity-35  z-10    h-[90vh] absolute w-screen"></div>
-      <div className="bg-[#ffffff4e] text-black
-      
-      bg-gradient-to-b from-gradiant-start from-10%  via-gradiant-2 via-30% to-90% to-gradiant-end backdrop-blur-md
-       md:w-[460px] flex flex-col w-screen top-16 bottom-16 left-0 right-0 absolute h-[93vh] z-20 overflow-hidden backdrop:blur-md transition duration-500 ">
-        {/* title */}
-        <div className="text-center text-4xl">Settings</div>
-        {/* Extras Toggle */}
-        <Toggle />
-        {/* Overs Limit */}
-        <div className="flex flex-col justify-around">
-          <ChangeCount
-            state={oversLimit}
-            setState={setOversLimit}
-            lable={"Overs Limit"}
-            def={oversLimit}
-            max={90}
-            b1={<i className="fa-solid fa-plus"></i>}
-            b2={<i className="fa-solid fa-minus"></i>}
-          ></ChangeCount>
+    <div className="space-y-6">
+      {/* Team Names Group */}
+      <div className="space-y-4">
+        <p className="text-[10px] font-black uppercase opacity-40 tracking-[0.2em] ml-1">
+          Team Identification
+        </p>
+        <div className="grid grid-cols-1 gap-3">
+          <TeamInput label="Team A" value={teamA} setValue={setTeamA} />
+          <TeamInput label="Team B" value={teamB} setValue={setTeamB} />
+        </div>
+      </div>
 
-          {/* Wickets Limit */}
-          <ChangeCount
-            state={wicketsLimit}
-            setState={setWicketsLimit}
-            lable={"wickets Limit"}
-            def={wicketsLimit}
-            max={10}
-            b1={<i className="fa-solid fa-plus"></i>}
-            b2={<i className="fa-solid fa-minus"></i>}
-          ></ChangeCount>
+      <hr className="border-neutral-100" />
+
+      {/* Match Rules Group */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between ml-1">
+          <p className="text-[10px] font-black uppercase opacity-40 tracking-[0.2em]">
+            Match Configuration
+          </p>
+          {matchStarted && (
+            <span className="text-[9px] font-black text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full uppercase">
+              Locked
+            </span>
+          )}
         </div>
 
-        <NewMatch />
+        <EditCount
+          label="Total Overs"
+          state={oversLimit}
+          setState={setOversLimit}
+          max={50}
+          disabled={matchStarted}
+        />
 
+        <EditCount
+          label="Wickets"
+          state={wicketsLimit}
+          setState={setWicketsLimit}
+          max={10}
+          disabled={matchStarted}
+        />
+
+        <div className="pt-2">
+          <Toggle />
+        </div>
       </div>
     </div>
   );
 };
-function ChangeCount({ lable, b1, b2, max, def, state, setState }) {
-  const editOvers = useRef();
-  const editCount = useRef();
-  const [isEdit, setisEdit] = useState(true);
-  const [value, setValue] = useState(def);
-  const Edit = (e) => {
-    setState(value);
-    setisEdit((e) => !e);
-  };
+
+/* --- Sub-Components --- */
+
+const TeamInput = ({ label, value, setValue }) => {
   return (
-   <div className="transition-all duration-700">
-     {/* <div className="flex flex-col items-center relative">
-      <p className="text-2xl font-semibold m-2 p-2">{lable}</p>
-
+    <div className="flex flex-col gap-1.5">
+      <label className="text-[11px] font-black text-neutral-400 uppercase tracking-tighter ml-1">
+        {label}
+      </label>
       <input
-        ref={editOvers}
-        readOnly
-        className="w-20 text-center p-1  text-3xl rounded-lg "
         value={value}
-        type="number"
-        name="versLimit"
-        id="overs"
+        placeholder={`Enter ${label}...`}
+        onChange={(e) => setValue(e.target.value)}
+        className="w-full p-3 text-sm font-bold transition-all border outline-none rounded-xl bg-neutral-50 border-neutral-100 focus:border-dominant focus:ring-4 focus:ring-dominant/5 text-neutral-800 placeholder:text-neutral-300"
       />
-
-      <div className="flex absolute top-[42%] ">
-        <button
-          className={`
-                    ${!isEdit ? "hidden" : "block "}
-                    ${
-                      value <= 1
-                        ? "opacity-50 cursor-not-allowed"
-                        : "opacity-100 cursor-pointer"
-                    }
-                    border px-2 mt-2 mx-1 text-2xl w-10 text-center rounded-md relative -left-10
-                    `}
-          disabled={value <= 1}
-          onClick={() => setValue((p) => p - 1)}
-        >
-          {b2}
-        </button>
-        <button
-          className={`
-                    ${!isEdit ? "hidden" : "block "}
-                    ${
-                      value >= max
-                        ? "opacity-50 cursor-not-allowed"
-                        : "opacity-100 cursor-pointer"
-                    }
-                    border px-2 mt-2 mx-1 text-2xl w-10 text-center rounded-md relative left-10
-                    `}
-          disabled={value >= max}
-          onClick={() => {
-            setValue((p) => p + 1);
-            console.log(value);
-          }}
-        >
-          {b1}
-        </button>
-      </div>
-
-      EDIT button
-      <button
-        className="bg-button-primary focus:bg-button-primary focus:outline-none focus:opacity-90 text-xl font-semibold p-2 mt-2 w-20 rounded-lg "
-        onClick={Edit}
-      >
-        {!isEdit ? "Edit " : "Save"}
-      </button>
-    </div> */}
-    <div className="flex justify-between p-5 items-center">
-      <p className="text-md font-semibold">{lable}</p>
-      <div className="flex items-center justify-center relative">
-        <button className={`
-          bg-accent p-2 h-8 w-8   rounded m-2 text-xl absolute  flex justify-center items-center transition-all duration-500
-          ${isEdit?"left- -z-0 pointer-events-none":'left-[-68px]'}
-          ${
-            value >= max
-              ? "opacity-50 cursor-not-allowed pointer-events-none"
-              : "opacity-100 cursor-pointer"
-          }
-          `}
-          onClick={() => setValue((p) => p + 1)}>{b1}</button>
-        <div ref={editCount} className={` 
-          bg-accent p-2 w-8 m-2 text-xl cursor-default rounded-md z-20  absolute flex justify-center items-center transition-all duration-500
-          ${isEdit?'-left-16':'-left-24'}
-          `}>{value}</div>
-        <button className={`
-          bg-accent p-1 h-8 w-6   rounded  m-1 text-xl absolute  flex justify-center items-center transition-all duration-500
-          ${isEdit?"left-[-70px] pointer-events-none":'left-[-145px]'}
-          ${
-            value <= 1
-              ? "opacity-50 cursor-not-allowed pointer-events-none"
-              : "opacity-100 cursor-pointer"
-          }
-          `}
-          onClick={() => setValue((p) => p - 1)}>{b2}</button>
-        <button className="p-3 z-10 bg-dominant text-text-1 rounded-lg"
-        onClick={Edit}
-        >
-        {!isEdit ? "Save" : "Edit."}
-        </button>
-      </div>
     </div>
-   </div>
   );
-}
+};
 
-export const EditCount =({ lable, b1, b2, max, def, state, setState })=> {
-  const editOvers = useRef();
-  const editCount = useRef();
-  const [isEdit, setisEdit] = useState(true);
-  const [value, setValue] = useState(def);
-  const Edit = (e) => {
-    setState(value);
-    setisEdit((e) => !e);
+export const EditCount = ({
+  label,
+  max,
+  state,
+  setState,
+  disabled = false,
+}) => {
+  const [value, setValue] = useState(state);
+
+  useEffect(() => {
+    setValue(state);
+  }, [state]);
+
+  const handleBlur = () => {
+    let newVal = Math.max(1, Math.min(max, Number(value) || 1));
+    setValue(newVal);
+    setState(newVal);
   };
-  return(
-    <div className="flex justify-between p-5 items-center">
-      <p className="text-md font-semibold">{lable}</p>
-      <div className="flex items-center justify-center relative">
-        <button className={`
-          bg-accent p-2 h-8 w-8   rounded m-2 text-xl absolute  flex justify-center items-center transition-all duration-500
-          ${isEdit?"left- -z-0 pointer-events-none":'left-[-68px]'}
-          ${
-            value >= max
-              ? "opacity-50 cursor-not-allowed pointer-events-none"
-              : "opacity-100 cursor-pointer"
-          }
-          `}
-          onClick={() => setValue((p) => p + 1)}>{b1}</button>
-        <div ref={editCount} className={` 
-          bg-accent p-2 w-8 m-2 text-xl cursor-default rounded-md z-20  absolute flex justify-center items-center transition-all duration-500
-          ${isEdit?'-left-16':'-left-24'}
-          `}>{value}</div>
-        <button className={`
-          bg-accent p-1 h-8 w-6   rounded  m-1 text-xl absolute  flex justify-center items-center transition-all duration-500
-          ${isEdit?"left-[-70px] pointer-events-none":'left-[-145px]'}
-          ${
-            value <= 1
-              ? "opacity-50 cursor-not-allowed pointer-events-none"
-              : "opacity-100 cursor-pointer"
-          }
-          `}
-          onClick={() => setValue((p) => p - 1)}>{b2}</button>
-        <button className="p-3 z-10 bg-dominant text-text-1 rounded-lg"
-        onClick={Edit}
+
+  const adjust = (amount) => {
+    const newVal = Math.max(1, Math.min(max, Number(value) + amount));
+    setValue(newVal);
+    setState(newVal);
+  };
+
+  return (
+    <div
+      className={`flex items-center justify-between p-3.5 rounded-2xl border transition-all ${disabled ? "bg-neutral-50 border-neutral-100 opacity-60" : "bg-white border-neutral-200"}`}
+    >
+      <span className="text-sm font-black text-neutral-700">{label}</span>
+
+      <div className="flex items-center gap-1 p-1 bg-neutral-100 rounded-xl">
+        <button
+          disabled={disabled}
+          onClick={() => adjust(-1)}
+          className="flex items-center justify-center w-8 h-8 transition-all bg-white rounded-lg shadow-sm text-neutral-800 active:scale-90 disabled:opacity-0"
         >
-        {!isEdit ? "Save" : "Edit."}
+          <i className="fa-solid fa-minus text-[10px]" />
+        </button>
+
+        <input
+          type="number"
+          value={value}
+          disabled={disabled}
+          onChange={(e) => setValue(e.target.value)}
+          onBlur={handleBlur}
+          className="w-10 text-sm font-black text-center bg-transparent outline-none text-neutral-800"
+        />
+
+        <button
+          disabled={disabled}
+          onClick={() => adjust(1)}
+          className="flex items-center justify-center w-8 h-8 text-white transition-all rounded-lg shadow-sm bg-dominant active:scale-90 disabled:opacity-0"
+        >
+          <i className="fa-solid fa-plus text-[10px]" />
         </button>
       </div>
     </div>
-  )
-}
+  );
+};

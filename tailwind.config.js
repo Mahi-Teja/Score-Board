@@ -1,96 +1,71 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
+  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
-    gradiant:'bg-gradient-to-b from-gradiant-start from-10%  via-gradiant-2 via-30% to-90% to-gradiant-end',
     extend: {
-      colors:{
-        'dominant':'#690299',
-        'neutral-1':'#878686',
-        'neutral-2':'#936FA5',
-        'neutral-2-blur':'#936FA5',
-        'neutral-2-light':'#D2B1E1',
-        'neutral-3':'#C6C6C6',
-        'accent':'#ffffff',
-        'text-1':'#FFFFFF',
-        'text-2':'#666666',
-        'color-main-body':'#754F44',
-        'btn-2':'#EAEAEA',
-        'btn-1':'#690299',
-        'gradiant-end':'#C89EDD',
-        'gradiant-start':'#D9d9d9',
-        'gradiant-1':'#D9D9D9',
-        'gradiant-2':'#B499C1',
-        'gradiant-3':'#C89EDD',
-        
+      colors: {
+        // --- 1. CORE BRANDING ---
+        // Your primary purple identity
+        dominant: "#690299",
+        accent: "#ffffff",
 
-
-
-        'ball-color':'#754F44',
-
-        'target-color':'#754F44',
-        'overs-history-color':'#754F4496',
-        'nav-color':'#EC7357',
-        'button-primary':'#EC7357',
-        'controls-color':'#EC7357',
-        'score-board-color':'#613A3A',
-        'innings-slider-color':'#FBFFB9',
-        'controls-bg':'#000F08',
-        'current-over':'#4eda82',
-        'curr-score':'#4e9ac2',
-        'controls-btns':'#4A051C',
-        'button-primary-1':'#E1CE7A',
-        'color-settings':'#f01efc',
-        'gradiant':'bg-gradient-to-br from-purple-200 to-indigo-400',
-        blue: {
-          primary: '#007BFF',
-          secondary: '#0056B3',
-          accent: '#66B2FF',
-          light: '#CCE5FF',
-          dark: '#004085',
+        // --- 2. THE PURPLE UI PALETTE ---
+        // Renamed from 'neutral' to 'brand-purple' to stop breaking Tailwind's default gray/neutral
+        "brand-purple": {
+          50: "#D2B1E1", // Your '2-light'
+          100: "#C6C6C6", // Your '3'
+          200: "#B499C1", // Your 'gradient-2'
+          500: "#936FA5", // Your '2'
+          700: "#878686", // Your '1'
         },
-        dark:{
-          nav:'#2c2b3c',
-          body:'#403f4c',
-          control:'#1b2432',
-          button:'#121420',
 
-        }
-      }
-      // colors:{
-      //   'color-main-body':'#754F44',
-      //   'ball-color':'#754F44',
+        // --- 3. SEMANTIC UI COMPONENTS ---
+        // Organized by usage so your code is readable (e.g., bg-match-ball)
+        match: {
+          body: "#754F44",
+          ball: "#754F44",
+          target: "#754F44",
+          history: "rgba(117, 79, 68, 0.59)", // #754F4496
+        },
 
-      //   'target-color':'#754F44',
-      //   'overs-history-color':'#754F4496',
-      //   'nav-color':'#EC7357',
-      //   'button-primary':'#EC7357',
-      //   'controls-color':'#EC7357',
-      //   'score-board-color':'#613A3A',
-      //   'innings-slider-color':'#FBFFB9',
-      //   'controls-bg':'#000F08',
-      //   'current-over':'#4eda82',
-      //   'curr-score':'#4e9ac2',
-      //   'controls-btns':'#4A051C',
-      //   'button-primary-1':'#E1CE7A',
-      //   'color-settings':'#f01efc',
-      //   'gradiant':'bg-gradient-to-br from-purple-200 to-indigo-400',
-      //   blue: {
-      //     primary: '#007BFF',
-      //     secondary: '#0056B3',
-      //     accent: '#66B2FF',
-      //     light: '#CCE5FF',
-      //     dark: '#004085',
-      //   },
-      // }
-    },
+        btn: {
+          primary: "#EC7357",
+          gold: "#E1CE7A",
+        },
 
-    backgroundImage: {
-      'custom-gradient': 'linear-gradient(to right, var(--tw-gradient-from) 10%, var(--tw-gradient-via) 30%, var(--tw-gradient-to) 90%)',
+        board: {
+          bg: "#613A3A",
+          over: "#4eda82",
+          score: "#4e9ac2",
+        },
+
+        // --- 4. LEGACY/THEME OVERRIDES ---
+        // Custom blue and dark themes moved to unique keys
+        scBlue: {
+          DEFAULT: "#007BFF",
+          dark: "#004085",
+          light: "#CCE5FF",
+        },
+        scDark: {
+          nav: "#2c2b3c",
+          body: "#403f4c",
+          btn: "#121420",
+        },
+      },
+
+      backgroundImage: {
+        // Fixed the gradient logic to use your specific hex stops
+        "app-gradient":
+          "linear-gradient(180deg, #D9D9D9 10%, #B499C1 30%, #C89EDD 90%)",
+        "purple-glass":
+          "linear-gradient(to bottom right, rgba(217, 217, 217, 0.2), rgba(200, 158, 221, 0.4))",
+      },
+
+      borderRadius: {
+        arena: "32px",
+        card: "40px",
+      },
     },
   },
   plugins: [],
-}
+};

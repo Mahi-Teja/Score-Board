@@ -1,22 +1,19 @@
 import { useResetMatch } from "../hooks/useResetMatch";
 
-
-export const NewMatch = () => {
+export const NewMatch = ({ closeMenu }) => {
   const clear = useResetMatch();
-  const clearAll = () => {
+
+  const handleClear = () => {
     clear();
+    if (closeMenu) closeMenu(); // Closes the entire sidebar after reset
   };
+
   return (
-    <>
-      <button
-        className="p-2 m-6 mb-2  text-xl font-semibold col-span-4 bg-dominant text-text-1 rounded-lg"
-        onClick={clearAll}
-      >
-        Start New Match
-      </button>
-      <p className="text-center text-xs text-text-1 opacity-70">
-        ? New Match will Reset all the Score recorded till now.
-      </p>
-    </>
+    <button
+      className="flex-1 p-2 text-sm font-bold text-white transition bg-red-500 rounded-lg active:scale-95 hover:bg-red-600"
+      onClick={handleClear}
+    >
+      Confirm Reset
+    </button>
   );
 };

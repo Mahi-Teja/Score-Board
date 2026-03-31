@@ -1,120 +1,125 @@
-import {
-  useRecoilState,
-  useRecoilValue,
-  useResetRecoilState,
-  useSetRecoilState,
-} from "recoil";
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
+
 import { inningsAtom, inningsTabAtom } from "../atoms/inningsAtom";
-import { runsAtom } from "../atoms/runsAtom";
+
+import { runsAtom, targetAtom } from "../atoms/runsAtom";
+
 import { wicketsAtom } from "../atoms/wicketsAtom";
+
 import {
   ballsAtom,
   oversLenthAtom,
   oversSelector,
 } from "../atoms/ballsOversAtom";
-import { runsOnExtra } from "../atoms/settingsAtom";
+
+import { oversLimitedTo, runsOnExtra } from "../atoms/settingsAtom";
+
 import {
-  AllBallLogAtom,
-  currentOverDetailsAtom,
   currentOverHistory,
   currentOverRunsFam,
   currentOverWicketsFam,
   overHistory,
 } from "../atoms/oversHistory";
+
 import { useEffect } from "react";
-import { controlsAccessAtom, overEndStatusAtom } from "../atoms/matchAtom";
-import icons from "../icons";
-import { BallIcons } from "./BallIcons";
+
+import {
+  controlsAccessAtom,
+  overEndStatusAtom,
+  teamANameAtom,
+  teamBNameAtom,
+  winnerAtom,
+} from "../atoms/matchAtom";
+import { useResetMatch } from "../hooks/useResetMatch";
+import { useNavigate } from "react-router-dom";
+
+/* ================= Score Controls ================= */
+
 export const ScoreControls = () => {
   const innings = useRecoilValue(inningsAtom);
   const [inningsTab, setInningsTab] = useRecoilState(inningsTabAtom);
   const controlsAccess = useRecoilValue(controlsAccessAtom);
   const overs = useRecoilValue(oversSelector(innings));
-  const [isextra, ] = useRecoilState(runsOnExtra);
-  const currentOverRuns = useRecoilValue(currentOverRunsFam(innings));
-  const currentOverWickets = useRecoilValue(currentOverWicketsFam(innings));
+  const isExtra = useRecoilValue(runsOnExtra);
   const [overLength, setOversLength] = useRecoilState(oversLenthAtom);
 
-  //getting  set states
+  const teamA = useRecoilValue(teamANameAtom);
+  const teamB = useRecoilValue(teamBNameAtom);
+  const winner = useRecoilValue(winnerAtom);
+
+  const runs = useRecoilValue(runsAtom(innings));
+
+  const totalOvers = useRecoilValue(oversLimitedTo);
+
+  const target = useRecoilValue(targetAtom);
+
+  const currBalls = useRecoilValue(ballsAtom(innings));
+  // Logic for the chase/result
+  const navigate = useNavigate();
+  const totalBalls = totalOvers * 6;
+  const ballsBowled = Array.isArray(currBalls) ? currBalls.length : currBalls;
+  const leftBalls = Math.max(totalBalls - ballsBowled, 0);
+  const runsNeeded = Math.max(target - runs, 0);
+  const runsMargin = target - 1 - runs;
+  const clearAll = useResetMatch();
+  const resetMatch = () => {
+    clearAll();
+    navigate("/cricket/config");
+  };
+
+  /* ---------------- Setters ---------------- */
   const setRuns = useSetRecoilState(runsAtom(innings));
   const setWickets = useSetRecoilState(wicketsAtom(innings));
   const setBalls = useSetRecoilState(ballsAtom(innings));
-  const [OversLOg, setOversLog] = useRecoilState(overHistory(innings));
-  const [overEndStatus, setOverEndStatus] = useRecoilState(overEndStatusAtom);
-
+  const setOversLog = useSetRecoilState(overHistory(innings));
   const setCurrentOver = useSetRecoilState(currentOverHistory(innings));
   const currentOver = useRecoilValue(currentOverHistory(innings));
-  const [currentOverDetails, setCurrentOverDetails] = useRecoilState(currentOverDetailsAtom(innings));
-  const resetCurrentOverDetails = useResetRecoilState(currentOverDetailsAtom(innings));
-  const setCurrentOverRuns = useSetRecoilState(currentOverRunsFam(innings));
-  const setCurrentOverWickets = useSetRecoilState(currentOverWicketsFam(innings));
-  const [allBallsLog, setAllBallsLog] = useRecoilState(AllBallLogAtom(innings));
+  const [currentOverRuns, setCurrentOverRuns] = useRecoilState(
+    currentOverRunsFam(innings),
+  );
+  const [currentOverWickets, setCurrentOverWickets] = useRecoilState(
+    currentOverWicketsFam(innings),
+  );
 
-
-  //click handles---
-  const clearCurrentOver = () => {
-    setCurrentOverRuns(0);
-    setCurrentOverWickets(0);
-    setCurrentOver([]);
+  /* ---------------- Helpers ---------------- */
+  const focusInningsTab = () => {
+    if (inningsTab !== innings) setInningsTab(innings);
   };
 
-  const addCurrentOverRuns = (run) => {
-    setCurrentOverDetails((prev) => ({
-      ...prev,
-      thisRuns: prev.thisRuns + run,
-    }));
-    setCurrentOverRuns((pre) => pre + run);
-  };
-  const addCurrentOverWicket = (wicket) => {
-    setCurrentOverDetails((prev) => ({
-      ...prev,
-      thisWickets: prev.thisWickets + wicket,
-    }));
-    setCurrentOverWickets((pre) => pre + wicket);
-  };
-  const addRuns = (lable, isextra, run) => {
-    isextra ? (setRuns((r) => r + run), addCurrentOverRuns(run)) : null;
-    addToHistory(lable);
-    focusInningsTab();
-  };
-  const addWickets = (lable) => {
-    setWickets((w) => w + 1);
-    addCurrentOverWicket(1);
-    addToHistory(lable);
-    focusInningsTab();
-  };
-  const addBalls = (lable, balls) => {
-    setBalls((b) => b + balls);
-    addToHistory(lable);
-    setOversLength((o) => o + 1);
-    focusInningsTab();
-  };
-  const addRunsAndBalls = (lable, balls, runs) => {
+  const addRunsAndBalls = (val) => {
+    const runs = Number(val);
     setRuns((r) => r + runs);
-    addCurrentOverRuns(runs);
-    addBalls(lable, balls);
+    setCurrentOverRuns((r) => r + runs);
+    setBalls((b) => b + 1);
+    setOversLength((o) => o + 1);
+    setCurrentOver((prev) => [...prev, val.toString()]);
+    focusInningsTab();
   };
-  const addWicketsAndBalls = (lable, balls, wickets) => {
-    addCurrentOverWicket(wickets);
 
-    setWickets((w) => w + wickets);
-    addBalls(lable, balls);
+  const handleWicket = () => {
+    setWickets((w) => w + 1);
+    setCurrentOverWickets((w) => w + 1);
+    setBalls((b) => b + 1);
+    setOversLength((o) => o + 1);
+    setCurrentOver((prev) => [...prev, "W"]);
+    focusInningsTab();
   };
-  const addToHistory = (current) => {
-    setAllBallsLog((pre) => [...pre, current]);
-    setCurrentOverDetails(() => ({
-      thisOvers: 2.0,
-      thisRuns: 21,
-      thisWickets: 2,
-      thisLog: [currentOver],
-    }));
-    setCurrentOver((pre) => [...pre, current]);
+
+  const handleExtra = (type) => {
+    // Standard cricket: WD and NB add 1 run to total even if no runs taken
+    if (isExtra) {
+      setRuns((r) => r + 1);
+      setCurrentOverRuns((r) => r + 1);
+    }
+    setCurrentOver((prev) => [...prev, type]);
+    focusInningsTab();
   };
+
+  /* ---------------- Over Complete Logic ---------------- */
   useEffect(() => {
-    if (overLength >= 6 || (overEndStatus && currentOver[0])) {
-      setOversLength(0);
-      setOversLog((pre) => [
-        ...pre,
+    if (overLength >= 6) {
+      setOversLog((prev) => [
+        ...prev,
         {
           runs: currentOverRuns,
           wickets: currentOverWickets,
@@ -122,158 +127,134 @@ export const ScoreControls = () => {
           log: currentOver,
         },
       ]);
+      // Reset for next over
       setCurrentOver([]);
-      clearCurrentOver();
+      setCurrentOverRuns(0);
+      setCurrentOverWickets(0);
+      setOversLength(0);
     }
-    return () => setOverEndStatus(false);
-  }, [
-    overLength,
-    currentOverRuns,
-    currentOverWickets,
-    overs,
-    OversLOg,
-    allBallsLog,
-    overEndStatus,
-    currentOver,
-    clearCurrentOver,
-    setOversLength,
-    setCurrentOver,
-    setOversLog,
-    setCurrentOverDetails,
-    setOverEndStatus,
-    resetCurrentOverDetails,
-  ]);
-  // Edit Feature
-  // const EditCurrentOver = ()=>{
-  //   if(currentOver[0]){
-  //   const options = {
-  //     'W':'w'
-      
-  //   }
-  //     const lastBall = currentOver[currentOver.length-1]
-  //     // if(lastBall==)
-  //     setBalls(b=>b-1)
-  //     setRuns(r=>r-Number(lastBall))
-  //     setOversLength(pre=>pre-1)
-  //     const editedOver = currentOver.slice(0,-1)
-  //     setCurrentOver(editedOver)
-  //   }
-  // }
+  }, [overLength]);
 
-  function focusInningsTab() {
-    inningsTab != innings ? setInningsTab(innings) : null;
+  /* ---------------- UI ---------------- */
+
+  // If match is finished, show the "New Match" Action Panel
+  if (!controlsAccess && winner !== 0) {
+    const isTeamBWinner = winner === 2;
+    const winnerName = isTeamBWinner ? teamB : teamA;
+    const resultText = isTeamBWinner
+      ? `by ${leftBalls} ${leftBalls === 1 ? "ball" : "balls"}`
+      : `by ${runsMargin} ${runsMargin === 1 ? "run" : "runs"}`;
+
+    return (
+      <div className="px-4 py-3 mx-2 mt-2 bg-neutral-900 border border-neutral-800 rounded-[24px] shadow-xl animate-in slide-in-from-top-2 duration-500">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center w-10 h-10 shadow-lg bg-amber-400 rounded-xl shadow-amber-500/20">
+              <i className="text-lg fa-solid fa-trophy text-neutral-900" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[10px] font-black uppercase text-amber-400 tracking-[0.2em] leading-none mb-1">
+                Match Result
+              </span>
+              <p className="text-sm font-black tracking-tight text-white">
+                {winnerName || (isTeamBWinner ? "Team B" : "Team A")}{" "}
+                <span className="font-medium text-white/60">
+                  won {resultText}
+                </span>
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={() => resetMatch()}
+            className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all active:scale-95 border border-white/10"
+          >
+            Start New
+          </button>
+        </div>
+      </div>
+    );
   }
-  return controlsAccess ? (
-    <div className="flex flex-wrap m-2 bg-accent rounded-2xl">
-      <ControlButton
-        lable={"1"}
-        params={[1, 1]}
-        imgCode={icons.single}
-        handleClick={addRunsAndBalls}
-      />
-      <ControlButton
-        lable={"2"}
-        params={[1, 2]}
-        imgCode={icons.double}
-        handleClick={addRunsAndBalls}
-      />
-      <ControlButton
-        lable={"4"}
-        params={[1, 4]}
-        imgCode={icons.four}
-        handleClick={addRunsAndBalls}
-      />
-      <ControlButton
-        lable={"6"}
-        params={[1, 6]}
-        imgCode={icons.six}
-        handleClick={addRunsAndBalls}
-      />
-      <ControlButton
-        lable={"0"}
-        params={[1, 0]}
-        imgCode={icons.dot}
-        handleClick={addRunsAndBalls}
-      />
-      <ControlButton
-        lable={"W"}
-        params={[1, 1]}
-        imgCode={icons.wicket}
-        handleClick={addWicketsAndBalls}
-      />
-      <ControlButton
-        lable={"Wd"}
-        params={[isextra, 1]}
-        imgCode={icons.wicket}
-        handleClick={addRuns}
-      />
-      {/* Edit Over Button */}
-      {/* <button 
-      className={`p-2 border bg-dominant w-[50px] h-[50px]  text-text-1 rounded-xl text-xl  m-2`}
-      onClick={EditCurrentOver}
-      >
-        <i className="fa-thin fa-pen-to-square" style={{color:'#ffffff'}}></i>
-        </button> */}
-    </div>
-  ) : (
-    <div className="flex w-screen pointer-events-none opacity-60">
-      <ControlButton
-        lable={"1"}
-        imgCode={icons.single}
-        params={[1, 1]}
-        handleClick={addRunsAndBalls}
-      />
-      <ControlButton
-        lable={"2"}
-        imgCode={icons.double}
-        params={[1, 2]}
-        handleClick={addRunsAndBalls}
-      />
-      <ControlButton
-        lable={"4"}
-        imgCode={icons.four}
-        params={[1, 4]}
-        handleClick={addRunsAndBalls}
-      />
-      <ControlButton
-        lable={"6"}
-        imgCode={icons.six}
-        params={[1, 6]}
-        handleClick={addRunsAndBalls}
-      />
-      <ControlButton
-        lable={"0"}
-        imgCode={icons.dot}
-        params={[1, 0]}
-        handleClick={addRunsAndBalls}
-      />
-      <ControlButton
-        lable={"W"}
-        imgCode={icons.wicket}
-        params={[1, 1]}
-        handleClick={addWicketsAndBalls}
-      />
-      <ControlButton
-        lable={"Wide"}
-        imgCode={icons.wicket}
-        params={[isextra, 1]}
-        handleClick={addRuns}
-      />
-    {/* this is else case */}
+  return (
+    <div
+      className={`p-1 space-y-3 transition-opacity ${!controlsAccess ? "hidden" : ""}`}
+      // className={`p-1 space-y-3 transition-opacity ${!controlsAccess ? "opacity-50 pointer-events-none" : ""}`}
+    >
+      {/* Primary Score Grid */}
+      <div className="grid grid-cols-4 gap-2">
+        {[0, 1, 2, 3].map((num) => (
+          <RunButton
+            key={num}
+            value={num}
+            onClick={() => addRunsAndBalls(num)}
+          />
+        ))}
+        <div className="col-span-2">
+          <RunButton value={4} highlight onClick={() => addRunsAndBalls(4)} />
+        </div>
+        <div className="col-span-2">
+          <RunButton value={6} highlight onClick={() => addRunsAndBalls(6)} />
+        </div>
+      </div>
+
+      {/* Extras Bar */}
+      <div className="flex gap-2">
+        {["WD", "NB", "BYE", "LB"].map((type) => (
+          <ExtraButton
+            key={type}
+            type={type}
+            onClick={() => handleExtra(type)}
+          />
+        ))}
+        <ExtraButton type="WKT" onClick={handleWicket} />
+      </div>
     </div>
   );
 };
 
-export const ControlButton = ({ lable, handleClick, params, imgCode }) => {
+/* ---------------- Sub-Components ---------------- */
+
+const RunButton = ({ value, highlight, onClick }) => (
+  <button
+    onClick={onClick}
+    className={`
+    h-12 w-full rounded-xl font-black text-lg transition-all active:scale-90
+    ${
+      highlight
+        ? "bg-dominant text-white shadow-lg shadow-dominant/20"
+        : "bg-white text-neutral-800 border border-neutral-200 shadow-sm"
+    }
+  `}
+  >
+    {value}
+  </button>
+);
+
+const ExtraButton = ({ type, onClick }) => (
+  <button
+    onClick={onClick}
+    className={`
+    flex-1 py-2 rounded-lg text-[11px] font-black transition-all active:scale-95
+    ${
+      type === "WKT"
+        ? "bg-red-50 text-red-600 border border-red-100"
+        : "bg-neutral-100 text-neutral-600 border border-transparent"
+    }
+  `}
+  >
+    {type}
+  </button>
+);
+
+/* ================= Control Button ================= */
+
+export const ControlButton = ({ label, onClick }) => {
   return (
     <button
-      className="p-2 border bg-dominant w-[50px] h-[50px]  text-text-1 rounded-xl text-xl  m-2"
-      onClick={() => handleClick(lable, ...params)}
-      // onClick={()=>handleClick(imgCode,...params)}
+      onClick={onClick}
+      className="h-12 font-semibold text-white transition shadow-sm rounded-xl bg-dominant active:scale-95"
     >
-        {/* this renders icons instead of characters */}
-      {/* <BallIcons src={imgCode}/> */}
-      {lable}
+      {label}
     </button>
   );
 };

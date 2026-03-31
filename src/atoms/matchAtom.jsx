@@ -4,6 +4,15 @@ export const matchStatusAtom = atom({
   key: "matchStatusAtom",
   default: false,
 });
+export const matchStartedAtom = atom({
+  key: "matchStartStatusAtom",
+  default: false,
+});
+export const matchFinishedAtom = atom({
+  key: "matchFinishStatusAtom",
+  default: false,
+});
+
 export const overEndStatusAtom = atom({
   key: "overEndStatusAtom",
   default: false,
@@ -13,14 +22,23 @@ export const controlsAccessAtom = atom({
   default: true,
 });
 export const winnerAtom = atom({
-  key:'winnerAtom',
-  default:null
-})
+  key: "winnerAtom",
+  default: null,
+});
 export const teamANameAtom = atom({
-    key:'teamANameAtom',
-    default:'Team A'
-})
+  key: "teamANameAtom",
+  default: "Team A",
+});
+export const teamAColorAtom = atom({
+  key: "teamAColorAtom",
+  default: "Team A",
+});
 export const teamBNameAtom = atom({
-    key:'teamBNameAtom',
-    default:'Team B'
-})
+  key: "teamBNameAtom",
+  default: "Team B",
+});
+
+export const teamBColorAtom = atom({
+  key: "teamBColorAtom",
+  default: "Team A",
+});
